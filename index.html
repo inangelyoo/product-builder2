@@ -4,12 +4,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
+  <title>Lotto Number Picker</title>
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
-  <h1>Hello, world!23</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+  <main class="lotto">
+    <h1>Lotto Number Picker</h1>
+    <p>Click to generate 6 unique numbers from 1 to 45.</p>
+    <button id="generate" type="button">Generate</button>
+    <div id="numbers" aria-live="polite"></div>
+  </main>
+  <script>
+    const output = document.getElementById("numbers");
+    const button = document.getElementById("generate");
+
+    function pickLottoNumbers() {
+      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+      for (let i = pool.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, 6).sort((a, b) => a - b);
+    }
+
+    button.addEventListener("click", () => {
+      const numbers = pickLottoNumbers();
+      output.innerHTML = numbers
+        .map((value) => `<span class="ball">${value}</span>`)
+        .join("");
+    });
+  </script>
 </body>
 </html>
