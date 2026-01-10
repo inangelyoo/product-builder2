@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,14 +9,60 @@
 </head>
 <body>
   <main class="lotto">
-    <h1>Lotto Number Picker</h1>
-    <p>Click to generate 6 unique numbers from 1 to 45.</p>
+    <div class="lang-switch">
+      <label for="language">Language</label>
+      <select id="language" name="language" aria-label="Language">
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+        <option value="ja">日本語</option>
+      </select>
+    </div>
+    <h1 id="title">Lotto Number Picker</h1>
+    <p id="subtitle">Click to generate 6 unique numbers from 1 to 45.</p>
     <button id="generate" type="button">Generate</button>
     <div id="numbers" aria-live="polite"></div>
   </main>
   <script>
+    const translations = {
+      en: {
+        title: "Lotto Number Picker",
+        subtitle: "Click to generate 6 unique numbers from 1 to 45.",
+        button: "Generate",
+        label: "Language",
+        htmlLang: "en",
+      },
+      ko: {
+        title: "로또 번호 추출기",
+        subtitle: "버튼을 눌러 1부터 45까지 중복 없는 6개 숫자를 생성하세요.",
+        button: "번호 생성",
+        label: "언어",
+        htmlLang: "ko",
+      },
+      ja: {
+        title: "ロト番号ジェネレーター",
+        subtitle: "ボタンを押して1〜45の重複なしの6つを生成します。",
+        button: "生成する",
+        label: "言語",
+        htmlLang: "ja",
+      },
+    };
+
+    const languageSelect = document.getElementById("language");
+    const title = document.getElementById("title");
+    const subtitle = document.getElementById("subtitle");
     const output = document.getElementById("numbers");
     const button = document.getElementById("generate");
+
+    function applyLanguage(lang) {
+      const t = translations[lang] ?? translations.en;
+      title.textContent = t.title;
+      subtitle.textContent = t.subtitle;
+      button.textContent = t.button;
+      document.querySelector(".lang-switch label").textContent = t.label;
+      document.documentElement.lang = t.htmlLang;
+      document.documentElement.dataset.lang = lang;
+      document.title = t.title;
+    }
 
     function pickLottoNumbers() {
       const pool = Array.from({ length: 45 }, (_, i) => i + 1);
@@ -32,6 +78,16 @@
       output.innerHTML = numbers
         .map((value) => `<span class="ball">${value}</span>`)
         .join("");
+    });
+
+    const savedLanguage = localStorage.getItem("lotto-language") || "en";
+    languageSelect.value = savedLanguage in translations ? savedLanguage : "en";
+    applyLanguage(languageSelect.value);
+
+    languageSelect.addEventListener("change", (event) => {
+      const nextLanguage = event.target.value;
+      localStorage.setItem("lotto-language", nextLanguage);
+      applyLanguage(nextLanguage);
     });
   </script>
 </body>

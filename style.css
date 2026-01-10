@@ -37,6 +37,29 @@ body {
   animation: rise 0.7s ease-out both;
 }
 
+.lang-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.lang-switch label {
+  font-weight: 600;
+}
+
+.lang-switch select {
+  border-radius: 999px;
+  border: 1px solid rgba(31, 27, 22, 0.15);
+  padding: 6px 12px;
+  background: #fff;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .lotto h1 {
   font-family: "Fraunces", "Palatino Linotype", "Book Antiqua", serif;
   font-size: clamp(2rem, 2.4vw, 2.6rem);
