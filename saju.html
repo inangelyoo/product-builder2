@@ -166,6 +166,10 @@
           money: "Money",
           health: "Health",
           advice: "Guidance",
+          daily: "Today",
+          monthly: "This Month",
+          yearly: "This Year",
+          lifetime: "Overall Path",
         },
       },
       ko: {
@@ -223,6 +227,10 @@
           money: "재물운",
           health: "건강",
           advice: "조언",
+          daily: "오늘 운세",
+          monthly: "이달 운세",
+          yearly: "올해 운세",
+          lifetime: "전체 운세",
         },
       },
       ja: {
@@ -280,6 +288,10 @@
           money: "金運",
           health: "健康",
           advice: "助言",
+          daily: "今日の運勢",
+          monthly: "今月の運勢",
+          yearly: "今年の運勢",
+          lifetime: "総合運",
         },
       },
       zh: {
@@ -337,6 +349,10 @@
           money: "财运",
           health: "健康",
           advice: "建议",
+          daily: "今日运势",
+          monthly: "本月运势",
+          yearly: "今年运势",
+          lifetime: "整体运势",
         },
       },
     };
@@ -464,6 +480,14 @@
           `Balance your energy: channel ${upper.trait} and rest with ${lower.trait}.`,
         advice: (upper, lower, line) =>
           `Focus on the changing line: ${line} Let ${upper.trait} guide the direction and ${lower.trait} steady the pace.`,
+        daily: (upper, lower, line) =>
+          `Today favors quick adjustments. ${line} Keep ${upper.trait} upfront while grounding decisions in ${lower.trait}.`,
+        monthly: (upper, lower) =>
+          `This month rewards steady progress. ${upper.trait} sets the goal, ${lower.trait} maintains momentum.`,
+        yearly: (upper, lower) =>
+          `This year expands through ${upper.trait} and matures with ${lower.trait}. Build long-term foundations.`,
+        lifetime: (upper, lower) =>
+          `Your overall path blends ${upper.trait} with ${lower.trait}, forming a resilient pattern over time.`,
       },
       ko: {
         overall: (upper, lower) =>
@@ -478,6 +502,14 @@
           `${upper.trait}을(를) 펼치되 ${lower.trait}로 컨디션을 회복하세요.`,
         advice: (upper, lower, line) =>
           `변효 조언: ${line} ${upper.trait}이(가) 방향을 잡고 ${lower.trait}이(가) 속도를 조절합니다.`,
+        daily: (upper, lower, line) =>
+          `오늘은 빠른 조정이 필요합니다. ${line} ${upper.trait}을(를) 앞세우고 ${lower.trait}로 균형을 지키세요.`,
+        monthly: (upper, lower) =>
+          `이달은 꾸준함이 관건입니다. ${upper.trait}으로 목표를 세우고 ${lower.trait}로 진행력을 유지하세요.`,
+        yearly: (upper, lower) =>
+          `올해는 ${upper.trait}의 확장과 ${lower.trait}의 안정이 함께합니다. 장기 기반을 다지세요.`,
+        lifetime: (upper, lower) =>
+          `전체 운세는 ${upper.trait}과 ${lower.trait}의 흐름이 반복되며 큰 구조를 만듭니다.`,
       },
       ja: {
         overall: (upper, lower) =>
@@ -492,6 +524,14 @@
           `${upper.trait}を発揮しつつ、${lower.trait}で体調を整えてください。`,
         advice: (upper, lower, line) =>
           `変爻の助言: ${line} ${upper.trait}で方向性を示し、${lower.trait}で歩みを整えましょう。`,
+        daily: (upper, lower, line) =>
+          `今日は微調整が鍵です。${line} ${upper.trait}を前に出しつつ、${lower.trait}で土台を整えましょう。`,
+        monthly: (upper, lower) =>
+          `今月は継続力が問われます。${upper.trait}で目標を定め、${lower.trait}で前進を保ちます。`,
+        yearly: (upper, lower) =>
+          `今年は${upper.trait}の拡大と${lower.trait}の安定が並走します。長期の基盤作りを。`,
+        lifetime: (upper, lower) =>
+          `総合的な流れは${upper.trait}と${lower.trait}が重なり合い、持続的な形をつくります。`,
       },
       zh: {
         overall: (upper, lower) =>
@@ -506,6 +546,14 @@
           `保持能量平衡：发挥${upper.trait}，以${lower.trait}修复与恢复。`,
         advice: (upper, lower, line) =>
           `变爻提示：${line} 让${upper.trait}指引方向，${lower.trait}稳住节奏。`,
+        daily: (upper, lower, line) =>
+          `今日宜快速调整。${line} 用${upper.trait}定调，以${lower.trait}稳住选择。`,
+        monthly: (upper, lower) =>
+          `本月重在稳步推进。${upper.trait}设定目标，${lower.trait}保持节奏。`,
+        yearly: (upper, lower) =>
+          `今年是${upper.trait}扩展与${lower.trait}沉淀并行的一年，适合打长期基础。`,
+        lifetime: (upper, lower) =>
+          `整体运势呈现${upper.trait}与${lower.trait}交织的长期轨迹。`,
       },
     };
 
@@ -899,6 +947,10 @@
         { key: "money", text: template.money(upper, lower) },
         { key: "health", text: template.health(upper, lower) },
         { key: "advice", text: template.advice(upper, lower, lineText) },
+        { key: "daily", text: template.daily(upper, lower, lineText) },
+        { key: "monthly", text: template.monthly(upper, lower, lineText) },
+        { key: "yearly", text: template.yearly(upper, lower, lineText) },
+        { key: "lifetime", text: template.lifetime(upper, lower) },
       ];
 
       const pillars = [
