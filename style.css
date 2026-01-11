@@ -123,6 +123,16 @@ body {
   align-items: center;
 }
 
+.saju .status {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.saju .status.error {
+  color: #c23a2d;
+  font-weight: 600;
+}
+
 .saju .inline {
   display: flex;
   align-items: center;
