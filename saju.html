@@ -27,8 +27,41 @@
     <form id="fortune-form">
       <div class="grid">
         <div>
+          <label id="calendar-type-label" for="calendar-type">Calendar</label>
+          <select id="calendar-type" name="calendar-type">
+            <option value="solar">Solar</option>
+            <option value="lunar">Lunar</option>
+          </select>
+        </div>
+        <div>
+          <label id="timezone-label" for="timezone">Time zone</label>
+          <select id="timezone" name="timezone"></select>
+        </div>
+      </div>
+      <div class="grid">
+        <div id="solar-fields">
           <label id="birth-date-label" for="birth-date">Birth date</label>
           <input id="birth-date" name="birth-date" type="date" required />
+        </div>
+        <div id="lunar-fields" class="lunar-fields" hidden>
+          <div class="grid">
+            <div>
+              <label id="lunar-year-label" for="lunar-year">Lunar year</label>
+              <input id="lunar-year" name="lunar-year" type="number" min="1900" max="2100" />
+            </div>
+            <div>
+              <label id="lunar-month-label" for="lunar-month">Lunar month</label>
+              <input id="lunar-month" name="lunar-month" type="number" min="1" max="12" />
+            </div>
+            <div>
+              <label id="lunar-day-label" for="lunar-day">Lunar day</label>
+              <input id="lunar-day" name="lunar-day" type="number" min="1" max="30" />
+            </div>
+          </div>
+          <label class="inline" id="leap-month-label">
+            <input id="leap-month" type="checkbox" />
+            <span id="leap-month-text">Leap month</span>
+          </label>
         </div>
         <div>
           <label id="birth-time-label" for="birth-time">Birth time</label>
@@ -45,6 +78,17 @@
       <div id="meta"></div>
       <h2 id="result-title">Your Hexagram</h2>
       <p id="result-summary"></p>
+      <div class="details-grid">
+        <div class="detail-card">
+          <h3 id="calendar-title">Calendar conversion</h3>
+          <div id="calendar-info" class="detail-list"></div>
+        </div>
+        <div class="detail-card">
+          <h3 id="bazi-title">Four Pillars</h3>
+          <div id="bazi-info" class="detail-list"></div>
+          <div id="bazi-table" class="bazi-table"></div>
+        </div>
+      </div>
       <div class="hexagrams">
         <div class="hexagram-card">
           <h3 id="base-title">Primary Hexagram</h3>
@@ -62,6 +106,7 @@
     </section>
   </main>
 
+  <script src="/lib/lunar.js"></script>
   <script>
     const translations = {
       en: {
@@ -69,12 +114,37 @@
         subtitle: "Enter your birth date and time to see a detailed I Ching reading.",
         label: "Language",
         home: "Back to Lotto",
+        calendarTypeLabel: "Calendar",
+        solarOption: "Solar (Gregorian)",
+        lunarOption: "Lunar (Korean)",
+        timezoneLabel: "Time zone",
+        autoTimezone: "Auto (browser)",
+        kstTimezone: "Korea Standard Time",
         date: "Birth date",
+        lunarYear: "Lunar year",
+        lunarMonth: "Lunar month",
+        lunarDay: "Lunar day",
+        leapMonth: "Leap month",
         time: "Birth time",
         button: "Get Fortune",
         helper: "Your input is only used on this device.",
         resultTitle: "Your Hexagram",
         summaryPrefix: "Core theme:",
+        calendarTitle: "Calendar conversion",
+        baziTitle: "Four Pillars (BaZi)",
+        localTimeLabel: "Input time",
+        kstTimeLabel: "Converted KST",
+        solarLabel: "Solar date",
+        lunarLabel: "Lunar date",
+        lunarInputLabel: "Lunar input",
+        jieqiLabel: "Jieqi",
+        baziLabel: "BaZi",
+        wuXingLabel: "Five elements",
+        naYinLabel: "Na Yin",
+        pillarYear: "Year",
+        pillarMonth: "Month",
+        pillarDay: "Day",
+        pillarTime: "Hour",
         baseTitle: "Primary Hexagram",
         changedTitle: "Changed Hexagram",
         upperLabel: "Upper trigram",
@@ -83,7 +153,7 @@
         hourLabel: "Double-hour",
         methodTitle: "Calculation method",
         methodIntro:
-          "Uses the Plum Blossom I Ching method: (year + month + day) mod 8 for the upper trigram, (year + month + day + hour) mod 8 for the lower trigram, and the same sum mod 6 for the changing line. Hour uses the traditional double-hour.",
+          "Uses Jieqi-based BaZi. Converts Heavenly Stems and Earthly Branches to numbers, then uses the total for upper trigram (mod 8), lower trigram (mod 8), and moving line (mod 6).",
         sections: {
           overall: "Overall",
           career: "Career",
@@ -98,12 +168,37 @@
         subtitle: "생년월일과 시간을 입력하면 상세한 주역 운세를 확인할 수 있어요.",
         label: "언어",
         home: "로또로 돌아가기",
+        calendarTypeLabel: "달력",
+        solarOption: "양력",
+        lunarOption: "음력",
+        timezoneLabel: "시간대",
+        autoTimezone: "자동 (브라우저)",
+        kstTimezone: "한국 표준시",
         date: "생년월일",
+        lunarYear: "음력 연도",
+        lunarMonth: "음력 월",
+        lunarDay: "음력 일",
+        leapMonth: "윤달",
         time: "태어난 시간",
         button: "운세 보기",
         helper: "입력값은 이 기기에서만 사용됩니다.",
         resultTitle: "나의 괘",
         summaryPrefix: "핵심 주제:",
+        calendarTitle: "달력 변환",
+        baziTitle: "사주팔자",
+        localTimeLabel: "입력 시간",
+        kstTimeLabel: "한국 시간",
+        solarLabel: "양력",
+        lunarLabel: "음력",
+        lunarInputLabel: "입력 음력",
+        jieqiLabel: "절기",
+        baziLabel: "팔자",
+        wuXingLabel: "오행",
+        naYinLabel: "납음",
+        pillarYear: "년주",
+        pillarMonth: "월주",
+        pillarDay: "일주",
+        pillarTime: "시주",
         baseTitle: "정괘",
         changedTitle: "변괘",
         upperLabel: "상괘",
@@ -112,7 +207,7 @@
         hourLabel: "시각(시주)",
         methodTitle: "계산 방식",
         methodIntro:
-          "매화역수 방식: (년 + 월 + 일) mod 8로 상괘, (년 + 월 + 일 + 시) mod 8로 하괘, 같은 합을 mod 6으로 변효를 구합니다. 시간은 전통적인 2시간 단위로 계산합니다.",
+          "절기 기준 사주팔자를 사용합니다. 천간·지지를 수치로 변환해 상괘(mod 8), 하괘(mod 8), 변효(mod 6)를 계산합니다.",
         sections: {
           overall: "전체운",
           career: "일·학업",
@@ -127,12 +222,37 @@
         subtitle: "生年月日と時間を入力すると詳しい易の占いが表示されます。",
         label: "言語",
         home: "ロトへ戻る",
+        calendarTypeLabel: "暦",
+        solarOption: "太陽暦",
+        lunarOption: "旧暦",
+        timezoneLabel: "タイムゾーン",
+        autoTimezone: "自動 (ブラウザ)",
+        kstTimezone: "韓国標準時",
         date: "生年月日",
+        lunarYear: "旧暦の年",
+        lunarMonth: "旧暦の月",
+        lunarDay: "旧暦の日",
+        leapMonth: "閏月",
         time: "出生時間",
         button: "占いを見る",
         helper: "入力はこの端末内のみで使用されます。",
         resultTitle: "あなたの卦",
         summaryPrefix: "中心テーマ:",
+        calendarTitle: "暦の変換",
+        baziTitle: "四柱推命",
+        localTimeLabel: "入力時刻",
+        kstTimeLabel: "韓国時刻",
+        solarLabel: "太陽暦",
+        lunarLabel: "旧暦",
+        lunarInputLabel: "入力旧暦",
+        jieqiLabel: "節気",
+        baziLabel: "四柱",
+        wuXingLabel: "五行",
+        naYinLabel: "納音",
+        pillarYear: "年柱",
+        pillarMonth: "月柱",
+        pillarDay: "日柱",
+        pillarTime: "時柱",
         baseTitle: "本卦",
         changedTitle: "之卦",
         upperLabel: "上卦",
@@ -141,7 +261,7 @@
         hourLabel: "時刻",
         methodTitle: "算出方法",
         methodIntro:
-          "梅花易数の方式: (年+月+日) mod 8で上卦、(年+月+日+時) mod 8で下卦、同じ合計をmod 6で変爻とします。時刻は伝統的な二時間単位で計算します。",
+          "節気基準の四柱を使用します。干支を数値化し、上卦(mod 8)、下卦(mod 8)、変爻(mod 6)を算出します。",
         sections: {
           overall: "総合運",
           career: "仕事・学業",
@@ -295,13 +415,33 @@
     const title = document.getElementById("title");
     const subtitle = document.getElementById("subtitle");
     const homeLink = document.getElementById("home-link");
+    const calendarType = document.getElementById("calendar-type");
+    const timezoneSelect = document.getElementById("timezone");
     const birthDateLabel = document.getElementById("birth-date-label");
     const birthTimeLabel = document.getElementById("birth-time-label");
+    const calendarTypeLabel = document.getElementById("calendar-type-label");
+    const timezoneLabel = document.getElementById("timezone-label");
+    const lunarYearLabel = document.getElementById("lunar-year-label");
+    const lunarMonthLabel = document.getElementById("lunar-month-label");
+    const lunarDayLabel = document.getElementById("lunar-day-label");
+    const leapMonthLabel = document.getElementById("leap-month-label");
+    const solarFields = document.getElementById("solar-fields");
+    const lunarFields = document.getElementById("lunar-fields");
+    const lunarYearInput = document.getElementById("lunar-year");
+    const lunarMonthInput = document.getElementById("lunar-month");
+    const lunarDayInput = document.getElementById("lunar-day");
+    const leapMonthInput = document.getElementById("leap-month");
+    const leapMonthText = document.getElementById("leap-month-text");
     const button = document.getElementById("generate");
     const helper = document.getElementById("helper");
     const result = document.getElementById("result");
     const resultTitle = document.getElementById("result-title");
     const resultSummary = document.getElementById("result-summary");
+    const calendarTitle = document.getElementById("calendar-title");
+    const baziTitle = document.getElementById("bazi-title");
+    const calendarInfo = document.getElementById("calendar-info");
+    const baziInfo = document.getElementById("bazi-info");
+    const baziTable = document.getElementById("bazi-table");
     const baseTitle = document.getElementById("base-title");
     const changedTitle = document.getElementById("changed-title");
     const baseLines = document.getElementById("base-lines");
@@ -311,7 +451,7 @@
     const meta = document.getElementById("meta");
     const sections = document.getElementById("sections");
     const method = document.getElementById("method");
-    let lastReadingData = null;
+    let lastReadingPayload = null;
 
     function normalizeLanguage(value) {
       if (!value) return "en";
@@ -325,36 +465,142 @@
       title.textContent = t.title;
       subtitle.textContent = t.subtitle;
       homeLink.textContent = t.home;
+      calendarTypeLabel.textContent = t.calendarTypeLabel;
+      timezoneLabel.textContent = t.timezoneLabel;
       birthDateLabel.textContent = t.date;
       birthTimeLabel.textContent = t.time;
+      lunarYearLabel.textContent = t.lunarYear;
+      lunarMonthLabel.textContent = t.lunarMonth;
+      lunarDayLabel.textContent = t.lunarDay;
+      leapMonthText.textContent = t.leapMonth;
       button.textContent = t.button;
       helper.textContent = t.helper;
       document.querySelector(".lang-switch label").textContent = t.label;
       resultTitle.textContent = t.resultTitle;
+      calendarTitle.textContent = t.calendarTitle;
+      baziTitle.textContent = t.baziTitle;
       baseTitle.textContent = t.baseTitle;
       changedTitle.textContent = t.changedTitle;
       document.documentElement.lang = lang;
       document.documentElement.dataset.lang = lang;
       document.title = t.title;
+      calendarType.options[0].textContent = t.solarOption;
+      calendarType.options[1].textContent = t.lunarOption;
     }
 
-    function parseBirthInfo(dateValue, timeValue) {
-      const [year, month, day] = dateValue.split("-").map(Number);
-      const [hour, minute] = timeValue.split(":").map(Number);
-      return { year, month, day, hour, minute };
+    function getTimeZones() {
+      if (typeof Intl.supportedValuesOf === "function") {
+        return Intl.supportedValuesOf("timeZone");
+      }
+      return [
+        "Asia/Seoul",
+        "Asia/Tokyo",
+        "Asia/Shanghai",
+        "Asia/Hong_Kong",
+        "America/New_York",
+        "America/Los_Angeles",
+        "Europe/London",
+        "Europe/Paris",
+        "Australia/Sydney",
+      ];
     }
 
-    function getDoubleHourIndex(hour) {
-      return (Math.floor((hour + 1) / 2) % 12) + 1;
+    function buildTimeZoneOptions(lang) {
+      const t = translations[lang] ?? translations.en;
+      timezoneSelect.innerHTML = "";
+      const autoOption = document.createElement("option");
+      autoOption.value = "auto";
+      autoOption.textContent = t.autoTimezone;
+      timezoneSelect.appendChild(autoOption);
+
+      const kstOption = document.createElement("option");
+      kstOption.value = "Asia/Seoul";
+      kstOption.textContent = t.kstTimezone;
+      timezoneSelect.appendChild(kstOption);
+
+      getTimeZones().forEach((zone) => {
+        if (zone === "Asia/Seoul") return;
+        const option = document.createElement("option");
+        option.value = zone;
+        option.textContent = zone;
+        timezoneSelect.appendChild(option);
+      });
     }
 
-    function calculateHexagram(year, month, day, doubleHour) {
-      const upperSum = year + month + day;
-      const lowerSum = upperSum + doubleHour;
-      const upperIndex = ((upperSum % 8) + 7) % 8;
-      const lowerIndex = ((lowerSum % 8) + 7) % 8;
-      const movingLine = lowerSum % 6 === 0 ? 6 : lowerSum % 6;
-      return { upperSum, lowerSum, upperIndex, lowerIndex, movingLine, doubleHour };
+    function resolveTimeZone() {
+      if (timezoneSelect.value === "auto") {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Seoul";
+      }
+      return timezoneSelect.value;
+    }
+
+    function formatParts(date, timeZone) {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+      });
+      const parts = Object.fromEntries(
+        formatter.formatToParts(date).map((part) => [part.type, part.value])
+      );
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month),
+        day: Number(parts.day),
+        hour: Number(parts.hour),
+        minute: Number(parts.minute),
+        second: Number(parts.second),
+      };
+    }
+
+    function zonedTimeToUtc(parts, timeZone) {
+      const utcDate = new Date(
+        Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second)
+      );
+      const tzParts = formatParts(utcDate, timeZone);
+      const asTimeZone = Date.UTC(
+        tzParts.year,
+        tzParts.month - 1,
+        tzParts.day,
+        tzParts.hour,
+        tzParts.minute,
+        tzParts.second
+      );
+      const offset = asTimeZone - utcDate.getTime();
+      return new Date(utcDate.getTime() - offset);
+    }
+
+    function formatDateTime(parts) {
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hour)}:${pad(parts.minute)}`;
+    }
+
+    function toggleCalendarFields(type) {
+      const isLunar = type === "lunar";
+      solarFields.hidden = isLunar;
+      lunarFields.hidden = !isLunar;
+      document.getElementById("birth-date").required = !isLunar;
+      document.getElementById("birth-date").disabled = isLunar;
+      lunarYearInput.required = isLunar;
+      lunarMonthInput.required = isLunar;
+      lunarDayInput.required = isLunar;
+      lunarYearInput.disabled = !isLunar;
+      lunarMonthInput.disabled = !isLunar;
+      lunarDayInput.disabled = !isLunar;
+      leapMonthInput.disabled = !isLunar;
+    }
+
+    function getGanIndex(gan) {
+      return LunarUtil.GAN.indexOf(gan) + 1;
+    }
+
+    function getZhiIndex(zhi) {
+      return LunarUtil.ZHI.indexOf(zhi) + 1;
     }
 
     function buildHexagramLines(upperIndex, lowerIndex) {
@@ -393,25 +639,134 @@
         .join("");
     }
 
-    function buildReading(lang, info) {
-      const t = translations[lang] ?? translations.en;
-      const upper = trigrams[info.upperIndex][lang];
-      const lower = trigrams[info.lowerIndex][lang];
-      const template = sectionTemplates[lang] || sectionTemplates.en;
-      const lineText = lineAdvice[lang]
-        ? lineAdvice[lang][info.movingLine - 1]
-        : lineAdvice.en[info.movingLine - 1];
+    function computePayload() {
+      const dateValue = document.getElementById("birth-date").value;
+      const timeValue = document.getElementById("birth-time").value;
+      if (!timeValue) return null;
 
-      const baseLines = buildHexagramLines(info.upperIndex, info.lowerIndex);
+      const [hour, minute] = timeValue.split(":").map(Number);
+      const inputTimeZone = resolveTimeZone();
+
+      let localSolarParts = null;
+      let inputCalendar = calendarType.value;
+      let inputLunarLabel = "";
+
+      if (inputCalendar === "solar") {
+        if (!dateValue) return null;
+        const [year, month, day] = dateValue.split("-").map(Number);
+        localSolarParts = { year, month, day, hour, minute, second: 0 };
+      } else {
+        const lunarYear = Number(lunarYearInput.value);
+        const lunarMonth = Number(lunarMonthInput.value);
+        const lunarDay = Number(lunarDayInput.value);
+        if (!lunarYear || !lunarMonth || !lunarDay) return null;
+        const monthValue = leapMonthInput.checked ? -lunarMonth : lunarMonth;
+        const lunar = Lunar.fromYmdHms(lunarYear, monthValue, lunarDay, hour, minute, 0);
+        const solar = lunar.getSolar();
+        localSolarParts = {
+          year: solar.getYear(),
+          month: solar.getMonth(),
+          day: solar.getDay(),
+          hour: solar.getHour(),
+          minute: solar.getMinute(),
+          second: solar.getSecond(),
+        };
+        inputLunarLabel = `${lunarYear}-${String(lunarMonth).padStart(2, "0")}-${String(
+          lunarDay
+        ).padStart(2, "0")}${leapMonthInput.checked ? " (leap)" : ""}`;
+      }
+
+      const utcDate = zonedTimeToUtc(localSolarParts, inputTimeZone);
+      const kstParts = formatParts(utcDate, "Asia/Seoul");
+      const kstSolar = Solar.fromYmdHms(
+        kstParts.year,
+        kstParts.month,
+        kstParts.day,
+        kstParts.hour,
+        kstParts.minute,
+        0
+      );
+      const lunar = kstSolar.getLunar();
+      const eightChar = lunar.getEightChar();
+
+      const ganIndices = {
+        year: getGanIndex(eightChar.getYearGan()),
+        month: getGanIndex(eightChar.getMonthGan()),
+        day: getGanIndex(eightChar.getDayGan()),
+        time: getGanIndex(eightChar.getTimeGan()),
+      };
+      const zhiIndices = {
+        year: getZhiIndex(eightChar.getYearZhi()),
+        month: getZhiIndex(eightChar.getMonthZhi()),
+        day: getZhiIndex(eightChar.getDayZhi()),
+        time: getZhiIndex(eightChar.getTimeZhi()),
+      };
+
+      const upperSum =
+        ganIndices.year +
+        zhiIndices.year +
+        ganIndices.month +
+        zhiIndices.month +
+        ganIndices.day +
+        zhiIndices.day;
+      const lowerSum = upperSum + ganIndices.time + zhiIndices.time;
+      const upperIndex = (upperSum % 8 || 8) - 1;
+      const lowerIndex = (lowerSum % 8 || 8) - 1;
+      const movingLine = lowerSum % 6 === 0 ? 6 : lowerSum % 6;
+
+      const baseLines = buildHexagramLines(upperIndex, lowerIndex);
       const baseNumber = linesToNumber(baseLines);
-      const changedLines = flipLine(baseLines, info.movingLine - 1);
+      const changedLines = flipLine(baseLines, movingLine - 1);
       const changedNumber = linesToNumber(changedLines);
       const changedTrigrams = linesToTrigrams(changedLines);
-      const changedUpper = trigrams[changedTrigrams.upperIndex][lang];
-      const changedLower = trigrams[changedTrigrams.lowerIndex][lang];
+
+      const lunarMonthValue = lunar.getMonth();
+      const lunarText = `${lunar.getYear()}-${String(Math.abs(lunarMonthValue)).padStart(
+        2,
+        "0"
+      )}-${String(lunar.getDay()).padStart(2, "0")}${
+        lunar.isLeap() ? " (leap)" : ""
+      }`;
+
+      const currentJieQi = lunar.getCurrentJieQi();
+      const jieqiName = currentJieQi ? currentJieQi.getName() : lunar.getJieQi() || "-";
+
+      return {
+        inputCalendar,
+        inputTimeZone,
+        inputLunarLabel,
+        localSolarParts,
+        kstParts,
+        lunarText,
+        jieqi: jieqiName,
+        eightChar,
+        upperIndex,
+        lowerIndex,
+        upperSum,
+        lowerSum,
+        movingLine,
+        baseLines,
+        baseNumber,
+        changedLines,
+        changedNumber,
+        changedTrigrams,
+      };
+    }
+
+    function buildReading(lang, payload) {
+      const t = translations[lang] ?? translations.en;
+      const upper = trigrams[payload.upperIndex][lang];
+      const lower = trigrams[payload.lowerIndex][lang];
+      const template = sectionTemplates[lang] || sectionTemplates.en;
+      const lineText = lineAdvice[lang]
+        ? lineAdvice[lang][payload.movingLine - 1]
+        : lineAdvice.en[payload.movingLine - 1];
+
+      const changedUpper = trigrams[payload.changedTrigrams.upperIndex][lang];
+      const changedLower = trigrams[payload.changedTrigrams.lowerIndex][lang];
 
       const resultMeta = [
-        `<span class="pill">#${baseNumber}</span>`,
+        `<span class="pill">#${payload.baseNumber}</span>`,
         `<span class="pill">${upper.name}</span>`,
         `<span class="pill">${lower.name}</span>`,
       ].join(" ");
@@ -429,33 +784,104 @@
         { key: "advice", text: template.advice(upper, lower, lineText) },
       ];
 
-      const methodDetail = `${t.methodTitle}: ${t.methodIntro} ${t.movingLabel}: ${info.movingLine} · ${t.upperLabel}: (${info.upperSum}) mod 8 → ${info.upperIndex + 1}, ${t.lowerLabel}: (${info.lowerSum}) mod 8 → ${info.lowerIndex + 1} · ${t.hourLabel}: ${info.doubleHour}.`;
+      const pillars = [
+        {
+          label: t.pillarYear,
+          value: payload.eightChar.getYear(),
+          wuxing: payload.eightChar.getYearWuXing(),
+          nayin: payload.eightChar.getYearNaYin(),
+        },
+        {
+          label: t.pillarMonth,
+          value: payload.eightChar.getMonth(),
+          wuxing: payload.eightChar.getMonthWuXing(),
+          nayin: payload.eightChar.getMonthNaYin(),
+        },
+        {
+          label: t.pillarDay,
+          value: payload.eightChar.getDay(),
+          wuxing: payload.eightChar.getDayWuXing(),
+          nayin: payload.eightChar.getDayNaYin(),
+        },
+        {
+          label: t.pillarTime,
+          value: payload.eightChar.getTime(),
+          wuxing: payload.eightChar.getTimeWuXing(),
+          nayin: payload.eightChar.getTimeNaYin(),
+        },
+      ];
+
+      const methodDetail = `${t.methodTitle}: ${t.methodIntro} ${t.movingLabel}: ${payload.movingLine} · ${t.upperLabel}: (${payload.upperSum}) mod 8 → ${payload.upperIndex + 1}, ${t.lowerLabel}: (${payload.lowerSum}) mod 8 → ${payload.lowerIndex + 1}.`;
 
       return {
         resultMeta,
         summary,
         items,
-        baseLines,
-        baseNumber,
         baseDesc,
-        changedLines,
-        changedNumber,
         changedDesc,
+        pillars,
         methodDetail,
-        movingLine: info.movingLine,
       };
     }
 
-    function renderReading(lang, reading) {
+    function renderReading(lang, payload, reading) {
       meta.innerHTML = reading.resultMeta;
       resultSummary.textContent = reading.summary;
       baseDesc.textContent = reading.baseDesc;
       changedDesc.textContent = reading.changedDesc;
-      renderLines(baseLines, reading.baseLines, reading.movingLine - 1);
-      renderLines(changedLines, reading.changedLines);
-      baseTitle.textContent = `${translations[lang].baseTitle} #${reading.baseNumber}`;
-      changedTitle.textContent = `${translations[lang].changedTitle} #${reading.changedNumber}`;
+      renderLines(baseLines, payload.baseLines, payload.movingLine - 1);
+      renderLines(changedLines, payload.changedLines);
+      baseTitle.textContent = `${translations[lang].baseTitle} #${payload.baseNumber}`;
+      changedTitle.textContent = `${translations[lang].changedTitle} #${payload.changedNumber}`;
       method.textContent = reading.methodDetail;
+
+      const calendarRows = [
+        `<div><strong>${translations[lang].calendarTypeLabel}:</strong> ${
+          payload.inputCalendar === "solar"
+            ? translations[lang].solarOption
+            : translations[lang].lunarOption
+        }</div>`,
+        `<div><strong>${translations[lang].localTimeLabel}:</strong> ${formatDateTime(
+          payload.localSolarParts
+        )} (${payload.inputTimeZone})</div>`,
+        `<div><strong>${translations[lang].kstTimeLabel}:</strong> ${formatDateTime(
+          payload.kstParts
+        )} (Asia/Seoul)</div>`,
+      ];
+
+      if (payload.inputCalendar === "lunar" && payload.inputLunarLabel) {
+        calendarRows.push(
+          `<div><strong>${translations[lang].lunarInputLabel}:</strong> ${payload.inputLunarLabel}</div>`
+        );
+      }
+
+      calendarRows.push(
+        `<div><strong>${translations[lang].solarLabel}:</strong> ${formatDateTime(
+          payload.kstParts
+        )}</div>`,
+        `<div><strong>${translations[lang].lunarLabel}:</strong> ${payload.lunarText}</div>`,
+        `<div><strong>${translations[lang].jieqiLabel}:</strong> ${payload.jieqi}</div>`
+      );
+
+      calendarInfo.innerHTML = calendarRows.join("");
+
+      baziInfo.innerHTML = `<div><strong>${translations[lang].baziLabel}:</strong> ${
+        payload.eightChar.getYear()
+      } ${payload.eightChar.getMonth()} ${payload.eightChar.getDay()} ${payload.eightChar.getTime()}</div>`;
+
+      baziTable.innerHTML = reading.pillars
+        .map(
+          (pillar) => `
+          <div class="bazi-row">
+            <div class="bazi-cell">${pillar.label}</div>
+            <div class="bazi-cell">${pillar.value}</div>
+            <div class="bazi-cell">${translations[lang].wuXingLabel}: ${pillar.wuxing}</div>
+            <div class="bazi-cell">${translations[lang].naYinLabel}: ${pillar.nayin}</div>
+          </div>
+        `
+        )
+        .join("");
+
       sections.innerHTML = reading.items
         .map(
           (item) => `
@@ -473,30 +899,46 @@
     const normalizedLanguage = normalizeLanguage(savedLanguage);
     languageSelect.value = normalizedLanguage in translations ? normalizedLanguage : "en";
     applyLanguage(languageSelect.value);
+    buildTimeZoneOptions(languageSelect.value);
+
+    const savedTimezone = localStorage.getItem("lotto-timezone") || "auto";
+    if ([...timezoneSelect.options].some((option) => option.value === savedTimezone)) {
+      timezoneSelect.value = savedTimezone;
+    }
+
+    toggleCalendarFields(calendarType.value);
 
     languageSelect.addEventListener("change", (event) => {
       const nextLanguage = event.target.value;
       localStorage.setItem("lotto-language", nextLanguage);
       applyLanguage(nextLanguage);
-      if (lastReadingData) {
-        const reading = buildReading(nextLanguage, lastReadingData);
-        renderReading(nextLanguage, reading);
+      const currentTimezone = timezoneSelect.value;
+      buildTimeZoneOptions(nextLanguage);
+      if ([...timezoneSelect.options].some((option) => option.value === currentTimezone)) {
+        timezoneSelect.value = currentTimezone;
       }
+      if (lastReadingPayload) {
+        const reading = buildReading(nextLanguage, lastReadingPayload);
+        renderReading(nextLanguage, lastReadingPayload, reading);
+      }
+    });
+
+    calendarType.addEventListener("change", (event) => {
+      toggleCalendarFields(event.target.value);
+    });
+
+    timezoneSelect.addEventListener("change", (event) => {
+      localStorage.setItem("lotto-timezone", event.target.value);
     });
 
     document.getElementById("fortune-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      const dateValue = document.getElementById("birth-date").value;
-      const timeValue = document.getElementById("birth-time").value;
-      if (!dateValue || !timeValue) return;
-
-      const info = parseBirthInfo(dateValue, timeValue);
-      const doubleHour = getDoubleHourIndex(info.hour);
-      const data = calculateHexagram(info.year, info.month, info.day, doubleHour);
+      const data = computePayload();
+      if (!data) return;
       const lang = languageSelect.value;
-      lastReadingData = data;
+      lastReadingPayload = data;
       const reading = buildReading(lang, data);
-      renderReading(lang, reading);
+      renderReading(lang, data, reading);
     });
   </script>
 </body>
