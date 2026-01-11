@@ -159,6 +159,7 @@
         methodTitle: "Calculation method",
         methodIntro:
           "Uses Jieqi-based BaZi. Converts Heavenly Stems and Earthly Branches to numbers, then uses the total for upper trigram (mod 8), lower trigram (mod 8), and moving line (mod 6).",
+        methodPeriodNote: "Period forecasts blend the current KST date into the base BaZi totals.",
         sections: {
           overall: "Overall",
           career: "Career",
@@ -220,6 +221,7 @@
         methodTitle: "계산 방식",
         methodIntro:
           "절기 기준 사주팔자를 사용합니다. 천간·지지를 수치로 변환해 상괘(mod 8), 하괘(mod 8), 변효(mod 6)를 계산합니다.",
+        methodPeriodNote: "기간별 운세는 한국 시간 기준 현재 날짜 값을 사주 합계에 반영합니다.",
         sections: {
           overall: "전체운",
           career: "일·학업",
@@ -281,6 +283,7 @@
         methodTitle: "算出方法",
         methodIntro:
           "節気基準の四柱を使用します。干支を数値化し、上卦(mod 8)、下卦(mod 8)、変爻(mod 6)を算出します。",
+        methodPeriodNote: "期間別の運勢は韓国時間の現在日付を四柱の合計に反映します。",
         sections: {
           overall: "総合運",
           career: "仕事・学業",
@@ -342,6 +345,7 @@
         methodTitle: "计算方式",
         methodIntro:
           "采用节气定八字，将天干地支数值化后计算上卦(mod 8)、下卦(mod 8)与变爻(mod 6)。",
+        methodPeriodNote: "分段运势会将韩国时间的当前日期加入八字合计。",
         sections: {
           overall: "整体运势",
           career: "事业学业",
@@ -896,12 +900,15 @@
       const currentJieQi = lunar.getCurrentJieQi();
       const jieqiName = currentJieQi ? currentJieQi.getName() : lunar.getJieQi() || "-";
 
+      const currentKstParts = formatParts(new Date(), "Asia/Seoul");
+
       return {
         inputCalendar,
         inputTimeZone,
         inputLunarLabel,
         localSolarParts,
         kstParts,
+        currentKstParts,
         lunarText,
         jieqi: jieqiName,
         eightChar,
@@ -940,6 +947,41 @@
       const baseDesc = `${t.upperLabel}: ${upper.name} · ${upper.trait} / ${t.lowerLabel}: ${lower.name} · ${lower.trait}`;
       const changedDesc = `${t.upperLabel}: ${changedUpper.name} · ${changedUpper.trait} / ${t.lowerLabel}: ${changedLower.name} · ${changedLower.trait}`;
 
+      function buildPeriodSums(seed) {
+        const upperSum = payload.upperSum + seed;
+        const lowerSum = payload.lowerSum + seed;
+        const upperIndex = (upperSum % 8 || 8) - 1;
+        const lowerIndex = (lowerSum % 8 || 8) - 1;
+        const movingLine = lowerSum % 6 === 0 ? 6 : lowerSum % 6;
+        return { upperSum, lowerSum, upperIndex, lowerIndex, movingLine };
+      }
+
+      const now = payload.currentKstParts;
+      const dailySeed = now.year + now.month + now.day;
+      const monthlySeed = now.year + now.month;
+      const yearlySeed = now.year;
+
+      const dailyData = buildPeriodSums(dailySeed);
+      const monthlyData = buildPeriodSums(monthlySeed);
+      const yearlyData = buildPeriodSums(yearlySeed);
+
+      const dailyUpper = trigrams[dailyData.upperIndex][lang];
+      const dailyLower = trigrams[dailyData.lowerIndex][lang];
+      const monthlyUpper = trigrams[monthlyData.upperIndex][lang];
+      const monthlyLower = trigrams[monthlyData.lowerIndex][lang];
+      const yearlyUpper = trigrams[yearlyData.upperIndex][lang];
+      const yearlyLower = trigrams[yearlyData.lowerIndex][lang];
+
+      const dailyLine = lineAdvice[lang]
+        ? lineAdvice[lang][dailyData.movingLine - 1]
+        : lineAdvice.en[dailyData.movingLine - 1];
+      const monthlyLine = lineAdvice[lang]
+        ? lineAdvice[lang][monthlyData.movingLine - 1]
+        : lineAdvice.en[monthlyData.movingLine - 1];
+      const yearlyLine = lineAdvice[lang]
+        ? lineAdvice[lang][yearlyData.movingLine - 1]
+        : lineAdvice.en[yearlyData.movingLine - 1];
+
       const items = [
         { key: "overall", text: template.overall(upper, lower) },
         { key: "career", text: template.career(upper, lower) },
@@ -947,9 +989,9 @@
         { key: "money", text: template.money(upper, lower) },
         { key: "health", text: template.health(upper, lower) },
         { key: "advice", text: template.advice(upper, lower, lineText) },
-        { key: "daily", text: template.daily(upper, lower, lineText) },
-        { key: "monthly", text: template.monthly(upper, lower, lineText) },
-        { key: "yearly", text: template.yearly(upper, lower, lineText) },
+        { key: "daily", text: template.daily(dailyUpper, dailyLower, dailyLine) },
+        { key: "monthly", text: template.monthly(monthlyUpper, monthlyLower, monthlyLine) },
+        { key: "yearly", text: template.yearly(yearlyUpper, yearlyLower, yearlyLine) },
         { key: "lifetime", text: template.lifetime(upper, lower) },
       ];
 
@@ -980,7 +1022,7 @@
         },
       ];
 
-      const methodDetail = `${t.methodTitle}: ${t.methodIntro} ${t.movingLabel}: ${payload.movingLine} · ${t.upperLabel}: (${payload.upperSum}) mod 8 → ${payload.upperIndex + 1}, ${t.lowerLabel}: (${payload.lowerSum}) mod 8 → ${payload.lowerIndex + 1}.`;
+      const methodDetail = `${t.methodTitle}: ${t.methodIntro} ${t.movingLabel}: ${payload.movingLine} · ${t.upperLabel}: (${payload.upperSum}) mod 8 → ${payload.upperIndex + 1}, ${t.lowerLabel}: (${payload.lowerSum}) mod 8 → ${payload.lowerIndex + 1}. ${t.methodPeriodNote}`;
 
       return {
         resultMeta,
