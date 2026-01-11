@@ -249,6 +249,7 @@
     const resultSummary = document.getElementById("result-summary");
     const meta = document.getElementById("meta");
     const sections = document.getElementById("sections");
+    let lastReadingData = null;
 
     function normalizeLanguage(value) {
       if (!value) return "en";
@@ -338,6 +339,10 @@
       const nextLanguage = event.target.value;
       localStorage.setItem("lotto-language", nextLanguage);
       applyLanguage(nextLanguage);
+      if (lastReadingData) {
+        const reading = buildReading(nextLanguage, lastReadingData);
+        renderReading(nextLanguage, reading);
+      }
     });
 
     document.getElementById("fortune-form").addEventListener("submit", (event) => {
@@ -349,6 +354,7 @@
       const seed = hashBirth(dateValue, timeValue);
       const data = pickHexagram(seed);
       const lang = languageSelect.value;
+      lastReadingData = data;
       const reading = buildReading(lang, data);
       renderReading(lang, reading);
     });
