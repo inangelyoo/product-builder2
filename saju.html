@@ -20,6 +20,7 @@
           <option value="en">English</option>
           <option value="ko">한국어</option>
           <option value="ja">日本語</option>
+          <option value="zh">中文</option>
         </select>
       </div>
     </header>
@@ -281,6 +282,63 @@
           advice: "助言",
         },
       },
+      zh: {
+        title: "周易运势指南",
+        subtitle: "输入出生日期和时间即可查看详细周易运势。",
+        label: "语言",
+        home: "返回大乐透",
+        calendarTypeLabel: "历法",
+        solarOption: "公历",
+        lunarOption: "农历",
+        timezoneLabel: "时区",
+        autoTimezone: "自动 (浏览器)",
+        kstTimezone: "韩国标准时间",
+        date: "出生日期",
+        lunarYear: "农历年",
+        lunarMonth: "农历月",
+        lunarDay: "农历日",
+        leapMonth: "闰月",
+        time: "出生时间",
+        button: "查看运势",
+        helper: "输入仅在本设备使用。",
+        error: "请检查输入后重试。",
+        errorDetail: "错误详情",
+        missing: "请填写出生日期与时间。",
+        resultTitle: "你的卦象",
+        summaryPrefix: "核心主题:",
+        calendarTitle: "历法转换",
+        baziTitle: "四柱八字",
+        localTimeLabel: "输入时间",
+        kstTimeLabel: "韩国时间",
+        solarLabel: "公历",
+        lunarLabel: "农历",
+        lunarInputLabel: "输入农历",
+        jieqiLabel: "节气",
+        baziLabel: "八字",
+        wuXingLabel: "五行",
+        naYinLabel: "纳音",
+        pillarYear: "年柱",
+        pillarMonth: "月柱",
+        pillarDay: "日柱",
+        pillarTime: "时柱",
+        baseTitle: "本卦",
+        changedTitle: "之卦",
+        upperLabel: "上卦",
+        lowerLabel: "下卦",
+        movingLabel: "变爻",
+        hourLabel: "时辰",
+        methodTitle: "计算方式",
+        methodIntro:
+          "采用节气定八字，将天干地支数值化后计算上卦(mod 8)、下卦(mod 8)与变爻(mod 6)。",
+        sections: {
+          overall: "整体运势",
+          career: "事业学业",
+          love: "感情",
+          money: "财运",
+          health: "健康",
+          advice: "建议",
+        },
+      },
     };
 
     const trigrams = [
@@ -289,48 +347,56 @@
         en: { name: "Heaven", trait: "clarity and leadership" },
         ko: { name: "건(乾)", trait: "맑은 기운과 리더십" },
         ja: { name: "乾", trait: "澄んだ気とリーダーシップ" },
+        zh: { name: "乾", trait: "清晰与领导力" },
       },
       {
         key: "dui",
         en: { name: "Lake", trait: "joyful openness" },
         ko: { name: "태(兌)", trait: "밝은 소통과 즐거움" },
         ja: { name: "兌", trait: "開放的な喜び" },
+        zh: { name: "兑", trait: "开放与喜悦" },
       },
       {
         key: "li",
         en: { name: "Fire", trait: "passion and insight" },
         ko: { name: "리(離)", trait: "열정과 통찰" },
         ja: { name: "離", trait: "情熱と洞察" },
+        zh: { name: "离", trait: "热情与洞察" },
       },
       {
         key: "zhen",
         en: { name: "Thunder", trait: "bold momentum" },
         ko: { name: "진(震)", trait: "도전과 추진력" },
         ja: { name: "震", trait: "大胆な推進力" },
+        zh: { name: "震", trait: "果断与推进力" },
       },
       {
         key: "xun",
         en: { name: "Wind", trait: "steady growth" },
         ko: { name: "손(巽)", trait: "꾸준한 성장" },
         ja: { name: "巽", trait: "着実な成長" },
+        zh: { name: "巽", trait: "稳健与成长" },
       },
       {
         key: "kan",
         en: { name: "Water", trait: "deep intuition" },
         ko: { name: "감(坎)", trait: "깊은 직관" },
         ja: { name: "坎", trait: "深い直感" },
+        zh: { name: "坎", trait: "深度直觉" },
       },
       {
         key: "gen",
         en: { name: "Mountain", trait: "stillness and focus" },
         ko: { name: "간(艮)", trait: "멈춤과 집중" },
         ja: { name: "艮", trait: "静けさと集中" },
+        zh: { name: "艮", trait: "沉静与专注" },
       },
       {
         key: "kun",
         en: { name: "Earth", trait: "supportive harmony" },
         ko: { name: "곤(坤)", trait: "포용과 조화" },
         ja: { name: "坤", trait: "支える調和" },
+        zh: { name: "坤", trait: "包容与协调" },
       },
     ];
 
@@ -373,6 +439,14 @@
         "四爻は柔軟な発想が成果を呼びます。",
         "五爻は頂点の時期、誠実なリーダーシップが鍵です。",
         "上爻は締めくくりと手放しを示します。",
+      ],
+      zh: [
+        "初爻提示先准备再行动。",
+        "二爻强调耐心与稳定推进。",
+        "三爻提醒张力上升，需保持平衡。",
+        "四爻鼓励灵活思考以促成结果。",
+        "五爻处在高点，务必以诚信引领。",
+        "上爻意味着完成与适时放下。",
       ],
     };
 
@@ -418,6 +492,20 @@
           `${upper.trait}を発揮しつつ、${lower.trait}で体調を整えてください。`,
         advice: (upper, lower, line) =>
           `変爻の助言: ${line} ${upper.trait}で方向性を示し、${lower.trait}で歩みを整えましょう。`,
+      },
+      zh: {
+        overall: (upper, lower) =>
+          `${upper.name}在上、${lower.name}在下，${upper.trait}与${lower.trait}相互呼应。`,
+        career: (upper, lower) =>
+          `事业与学业上，以${upper.trait}开局，并用${lower.trait}稳固执行。`,
+        love: (upper, lower) =>
+          `感情中，${upper.trait}与${lower.trait}相遇更易稳定。`,
+        money: (upper, lower) =>
+          `财运先由${lower.trait}打底，再以${upper.trait}扩展。`,
+        health: (upper, lower) =>
+          `保持能量平衡：发挥${upper.trait}，以${lower.trait}修复与恢复。`,
+        advice: (upper, lower, line) =>
+          `变爻提示：${line} 让${upper.trait}指引方向，${lower.trait}稳住节奏。`,
       },
     };
 
@@ -468,6 +556,7 @@
       if (!value) return "en";
       if (value.startsWith("ko")) return "ko";
       if (value.startsWith("ja")) return "ja";
+      if (value.startsWith("zh")) return "zh";
       return "en";
     }
 

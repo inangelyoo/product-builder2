@@ -15,6 +15,7 @@
         <option value="en">English</option>
         <option value="ko">한국어</option>
         <option value="ja">日本語</option>
+        <option value="zh">中文</option>
       </select>
     </div>
     <a class="nav-link" id="saju-link" href="/saju.html">I Ching Fortune Guide</a>
@@ -48,6 +49,14 @@
         label: "言語",
         link: "易占いガイド",
         htmlLang: "ja",
+      },
+      zh: {
+        title: "大乐透选号器",
+        subtitle: "点击生成1到45之间不重复的6个号码。",
+        button: "生成号码",
+        label: "语言",
+        link: "周易运势指南",
+        htmlLang: "zh",
       },
     };
 
@@ -91,7 +100,9 @@
       ? "ko"
       : savedLanguage.startsWith("ja")
         ? "ja"
-        : "en";
+        : savedLanguage.startsWith("zh")
+          ? "zh"
+          : "en";
     languageSelect.value = normalizedLanguage in translations ? normalizedLanguage : "en";
     applyLanguage(languageSelect.value);
 
