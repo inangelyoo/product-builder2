@@ -750,12 +750,11 @@
       const changedTrigrams = linesToTrigrams(changedLines);
 
       const lunarMonthValue = lunar.getMonth();
+      const isLeapMonth = lunarMonthValue < 0;
       const lunarText = `${lunar.getYear()}-${String(Math.abs(lunarMonthValue)).padStart(
         2,
         "0"
-      )}-${String(lunar.getDay()).padStart(2, "0")}${
-        lunar.isLeap() ? " (leap)" : ""
-      }`;
+      )}-${String(lunar.getDay()).padStart(2, "0")}${isLeapMonth ? " (leap)" : ""}`;
 
       const currentJieQi = lunar.getCurrentJieQi();
       const jieqiName = currentJieQi ? currentJieQi.getName() : lunar.getJieQi() || "-";
