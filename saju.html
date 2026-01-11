@@ -45,7 +45,20 @@
       <div id="meta"></div>
       <h2 id="result-title">Your Hexagram</h2>
       <p id="result-summary"></p>
+      <div class="hexagrams">
+        <div class="hexagram-card">
+          <h3 id="base-title">Primary Hexagram</h3>
+          <div class="hexagram-lines" id="base-lines" aria-hidden="true"></div>
+          <p id="base-desc"></p>
+        </div>
+        <div class="hexagram-card">
+          <h3 id="changed-title">Changed Hexagram</h3>
+          <div class="hexagram-lines" id="changed-lines" aria-hidden="true"></div>
+          <p id="changed-desc"></p>
+        </div>
+      </div>
       <div class="sections" id="sections"></div>
+      <div class="method" id="method"></div>
     </section>
   </main>
 
@@ -62,6 +75,15 @@
         helper: "Your input is only used on this device.",
         resultTitle: "Your Hexagram",
         summaryPrefix: "Core theme:",
+        baseTitle: "Primary Hexagram",
+        changedTitle: "Changed Hexagram",
+        upperLabel: "Upper trigram",
+        lowerLabel: "Lower trigram",
+        movingLabel: "Changing line",
+        hourLabel: "Double-hour",
+        methodTitle: "Calculation method",
+        methodIntro:
+          "Uses the Plum Blossom I Ching method: (year + month + day) mod 8 for the upper trigram, (year + month + day + hour) mod 8 for the lower trigram, and the same sum mod 6 for the changing line. Hour uses the traditional double-hour.",
         sections: {
           overall: "Overall",
           career: "Career",
@@ -82,6 +104,15 @@
         helper: "입력값은 이 기기에서만 사용됩니다.",
         resultTitle: "나의 괘",
         summaryPrefix: "핵심 주제:",
+        baseTitle: "정괘",
+        changedTitle: "변괘",
+        upperLabel: "상괘",
+        lowerLabel: "하괘",
+        movingLabel: "변효",
+        hourLabel: "시각(시주)",
+        methodTitle: "계산 방식",
+        methodIntro:
+          "매화역수 방식: (년 + 월 + 일) mod 8로 상괘, (년 + 월 + 일 + 시) mod 8로 하괘, 같은 합을 mod 6으로 변효를 구합니다. 시간은 전통적인 2시간 단위로 계산합니다.",
         sections: {
           overall: "전체운",
           career: "일·학업",
@@ -102,6 +133,15 @@
         helper: "入力はこの端末内のみで使用されます。",
         resultTitle: "あなたの卦",
         summaryPrefix: "中心テーマ:",
+        baseTitle: "本卦",
+        changedTitle: "之卦",
+        upperLabel: "上卦",
+        lowerLabel: "下卦",
+        movingLabel: "変爻",
+        hourLabel: "時刻",
+        methodTitle: "算出方法",
+        methodIntro:
+          "梅花易数の方式: (年+月+日) mod 8で上卦、(年+月+日+時) mod 8で下卦、同じ合計をmod 6で変爻とします。時刻は伝統的な二時間単位で計算します。",
         sections: {
           overall: "総合運",
           career: "仕事・学業",
@@ -163,6 +203,21 @@
         ja: { name: "坤", trait: "支える調和" },
       },
     ];
+
+    const trigramLines = [
+      [1, 1, 1],
+      [1, 1, 0],
+      [1, 0, 1],
+      [1, 0, 0],
+      [0, 1, 1],
+      [0, 1, 0],
+      [0, 0, 1],
+      [0, 0, 0],
+    ];
+
+    const trigramIndexByBits = new Map(
+      trigramLines.map((lines, index) => [lines.join(""), index])
+    );
 
     const lineAdvice = {
       en: [
@@ -247,8 +302,15 @@
     const result = document.getElementById("result");
     const resultTitle = document.getElementById("result-title");
     const resultSummary = document.getElementById("result-summary");
+    const baseTitle = document.getElementById("base-title");
+    const changedTitle = document.getElementById("changed-title");
+    const baseLines = document.getElementById("base-lines");
+    const changedLines = document.getElementById("changed-lines");
+    const baseDesc = document.getElementById("base-desc");
+    const changedDesc = document.getElementById("changed-desc");
     const meta = document.getElementById("meta");
     const sections = document.getElementById("sections");
+    const method = document.getElementById("method");
     let lastReadingData = null;
 
     function normalizeLanguage(value) {
@@ -269,38 +331,94 @@
       helper.textContent = t.helper;
       document.querySelector(".lang-switch label").textContent = t.label;
       resultTitle.textContent = t.resultTitle;
+      baseTitle.textContent = t.baseTitle;
+      changedTitle.textContent = t.changedTitle;
       document.documentElement.lang = lang;
       document.documentElement.dataset.lang = lang;
       document.title = t.title;
     }
 
-    function hashBirth(dateValue, timeValue) {
-      const date = new Date(`${dateValue}T${timeValue}:00`);
-      const seed = Number.isNaN(date.getTime()) ? 0 : date.getTime();
-      return Math.abs(seed);
+    function parseBirthInfo(dateValue, timeValue) {
+      const [year, month, day] = dateValue.split("-").map(Number);
+      const [hour, minute] = timeValue.split(":").map(Number);
+      return { year, month, day, hour, minute };
     }
 
-    function pickHexagram(seed) {
-      const hexagram = seed % 64;
-      const upper = Math.floor(hexagram / 8);
-      const lower = hexagram % 8;
-      const line = seed % 6;
-      return { hexagram, upper, lower, line };
+    function getDoubleHourIndex(hour) {
+      return (Math.floor((hour + 1) / 2) % 12) + 1;
     }
 
-    function buildReading(lang, data) {
-      const upper = trigrams[data.upper][lang];
-      const lower = trigrams[data.lower][lang];
+    function calculateHexagram(year, month, day, doubleHour) {
+      const upperSum = year + month + day;
+      const lowerSum = upperSum + doubleHour;
+      const upperIndex = ((upperSum % 8) + 7) % 8;
+      const lowerIndex = ((lowerSum % 8) + 7) % 8;
+      const movingLine = lowerSum % 6 === 0 ? 6 : lowerSum % 6;
+      return { upperSum, lowerSum, upperIndex, lowerIndex, movingLine, doubleHour };
+    }
+
+    function buildHexagramLines(upperIndex, lowerIndex) {
+      return [...trigramLines[lowerIndex], ...trigramLines[upperIndex]];
+    }
+
+    function linesToNumber(lines) {
+      return lines.reduce((acc, bit, index) => acc + (bit << index), 0) + 1;
+    }
+
+    function flipLine(lines, index) {
+      const next = [...lines];
+      next[index] = next[index] === 1 ? 0 : 1;
+      return next;
+    }
+
+    function linesToTrigrams(lines) {
+      const lowerBits = lines.slice(0, 3).join("");
+      const upperBits = lines.slice(3, 6).join("");
+      return {
+        lowerIndex: trigramIndexByBits.get(lowerBits),
+        upperIndex: trigramIndexByBits.get(upperBits),
+      };
+    }
+
+    function renderLines(container, lines, movingIndex) {
+      const reversed = [...lines].reverse();
+      const movingPosition =
+        typeof movingIndex === "number" ? reversed.length - 1 - movingIndex : -1;
+      container.innerHTML = reversed
+        .map((bit, idx) => {
+          const classes = ["hex-line", bit === 1 ? "yang" : "yin"];
+          if (idx === movingPosition) classes.push("moving");
+          return `<div class=\"${classes.join(" ")}\"></div>`;
+        })
+        .join("");
+    }
+
+    function buildReading(lang, info) {
+      const t = translations[lang] ?? translations.en;
+      const upper = trigrams[info.upperIndex][lang];
+      const lower = trigrams[info.lowerIndex][lang];
       const template = sectionTemplates[lang] || sectionTemplates.en;
-      const lineText = lineAdvice[lang] ? lineAdvice[lang][data.line] : lineAdvice.en[data.line];
+      const lineText = lineAdvice[lang]
+        ? lineAdvice[lang][info.movingLine - 1]
+        : lineAdvice.en[info.movingLine - 1];
+
+      const baseLines = buildHexagramLines(info.upperIndex, info.lowerIndex);
+      const baseNumber = linesToNumber(baseLines);
+      const changedLines = flipLine(baseLines, info.movingLine - 1);
+      const changedNumber = linesToNumber(changedLines);
+      const changedTrigrams = linesToTrigrams(changedLines);
+      const changedUpper = trigrams[changedTrigrams.upperIndex][lang];
+      const changedLower = trigrams[changedTrigrams.lowerIndex][lang];
 
       const resultMeta = [
-        `<span class="pill">#${data.hexagram + 1}</span>`,
+        `<span class="pill">#${baseNumber}</span>`,
         `<span class="pill">${upper.name}</span>`,
         `<span class="pill">${lower.name}</span>`,
       ].join(" ");
 
-      const summary = `${translations[lang].summaryPrefix} ${upper.trait} + ${lower.trait}`;
+      const summary = `${t.summaryPrefix} ${upper.trait} + ${lower.trait}`;
+      const baseDesc = `${t.upperLabel}: ${upper.name} · ${upper.trait} / ${t.lowerLabel}: ${lower.name} · ${lower.trait}`;
+      const changedDesc = `${t.upperLabel}: ${changedUpper.name} · ${changedUpper.trait} / ${t.lowerLabel}: ${changedLower.name} · ${changedLower.trait}`;
 
       const items = [
         { key: "overall", text: template.overall(upper, lower) },
@@ -311,12 +429,33 @@
         { key: "advice", text: template.advice(upper, lower, lineText) },
       ];
 
-      return { resultMeta, summary, items };
+      const methodDetail = `${t.methodTitle}: ${t.methodIntro} ${t.movingLabel}: ${info.movingLine} · ${t.upperLabel}: (${info.upperSum}) mod 8 → ${info.upperIndex + 1}, ${t.lowerLabel}: (${info.lowerSum}) mod 8 → ${info.lowerIndex + 1} · ${t.hourLabel}: ${info.doubleHour}.`;
+
+      return {
+        resultMeta,
+        summary,
+        items,
+        baseLines,
+        baseNumber,
+        baseDesc,
+        changedLines,
+        changedNumber,
+        changedDesc,
+        methodDetail,
+        movingLine: info.movingLine,
+      };
     }
 
     function renderReading(lang, reading) {
       meta.innerHTML = reading.resultMeta;
       resultSummary.textContent = reading.summary;
+      baseDesc.textContent = reading.baseDesc;
+      changedDesc.textContent = reading.changedDesc;
+      renderLines(baseLines, reading.baseLines, reading.movingLine - 1);
+      renderLines(changedLines, reading.changedLines);
+      baseTitle.textContent = `${translations[lang].baseTitle} #${reading.baseNumber}`;
+      changedTitle.textContent = `${translations[lang].changedTitle} #${reading.changedNumber}`;
+      method.textContent = reading.methodDetail;
       sections.innerHTML = reading.items
         .map(
           (item) => `
@@ -351,8 +490,9 @@
       const timeValue = document.getElementById("birth-time").value;
       if (!dateValue || !timeValue) return;
 
-      const seed = hashBirth(dateValue, timeValue);
-      const data = pickHexagram(seed);
+      const info = parseBirthInfo(dateValue, timeValue);
+      const doubleHour = getDoubleHourIndex(info.hour);
+      const data = calculateHexagram(info.year, info.month, info.day, doubleHour);
       const lang = languageSelect.value;
       lastReadingData = data;
       const reading = buildReading(lang, data);

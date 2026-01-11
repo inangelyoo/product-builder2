@@ -137,6 +137,60 @@ body {
   font-size: 1.2rem;
 }
 
+.hexagrams {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 18px 0 8px;
+}
+
+.hexagram-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(31, 27, 22, 0.08);
+  box-shadow: 0 10px 20px rgba(39, 24, 9, 0.08);
+}
+
+.hexagram-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.hexagram-lines {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.hex-line {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.hex-line.yin {
+  background: linear-gradient(
+    to right,
+    var(--ink) 0%,
+    var(--ink) 42%,
+    transparent 42%,
+    transparent 58%,
+    var(--ink) 58%,
+    var(--ink) 100%
+  );
+}
+
+.hex-line.moving {
+  box-shadow: 0 0 0 2px rgba(230, 95, 66, 0.45);
+}
+
+.method {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .saju .pill {
   display: inline-flex;
   padding: 6px 12px;
