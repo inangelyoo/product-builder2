@@ -17,6 +17,7 @@
         <option value="ja">日本語</option>
       </select>
     </div>
+    <a class="nav-link" id="saju-link" href="/saju.html">I Ching Fortune Guide</a>
     <h1 id="title">Lotto Number Picker</h1>
     <p id="subtitle">Click to generate 6 unique numbers from 1 to 45.</p>
     <button id="generate" type="button">Generate</button>
@@ -29,6 +30,7 @@
         subtitle: "Click to generate 6 unique numbers from 1 to 45.",
         button: "Generate",
         label: "Language",
+        link: "I Ching Fortune Guide",
         htmlLang: "en",
       },
       ko: {
@@ -36,6 +38,7 @@
         subtitle: "버튼을 눌러 1부터 45까지 중복 없는 6개 숫자를 생성하세요.",
         button: "번호 생성",
         label: "언어",
+        link: "주역 운세 안내",
         htmlLang: "ko",
       },
       ja: {
@@ -43,6 +46,7 @@
         subtitle: "ボタンを押して1〜45の重複なしの6つを生成します。",
         button: "生成する",
         label: "言語",
+        link: "易占いガイド",
         htmlLang: "ja",
       },
     };
@@ -52,6 +56,7 @@
     const subtitle = document.getElementById("subtitle");
     const output = document.getElementById("numbers");
     const button = document.getElementById("generate");
+    const sajuLink = document.getElementById("saju-link");
 
     function applyLanguage(lang) {
       const t = translations[lang] ?? translations.en;
@@ -59,6 +64,7 @@
       subtitle.textContent = t.subtitle;
       button.textContent = t.button;
       document.querySelector(".lang-switch label").textContent = t.label;
+      sajuLink.textContent = t.link;
       document.documentElement.lang = t.htmlLang;
       document.documentElement.dataset.lang = lang;
       document.title = t.title;
@@ -80,8 +86,13 @@
         .join("");
     });
 
-    const savedLanguage = localStorage.getItem("lotto-language") || "en";
-    languageSelect.value = savedLanguage in translations ? savedLanguage : "en";
+    const savedLanguage = localStorage.getItem("lotto-language") || navigator.language;
+    const normalizedLanguage = savedLanguage.startsWith("ko")
+      ? "ko"
+      : savedLanguage.startsWith("ja")
+        ? "ja"
+        : "en";
+    languageSelect.value = normalizedLanguage in translations ? normalizedLanguage : "en";
     applyLanguage(languageSelect.value);
 
     languageSelect.addEventListener("change", (event) => {

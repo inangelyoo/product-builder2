@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Ching Fortune Guide</title>
+  <link href='/style.css' rel='stylesheet'>
+</head>
+<body>
+  <main class="saju">
+    <header>
+      <div>
+        <a class="nav-link" id="home-link" href="/index.html">Back to Lotto</a>
+        <h1 id="title">I Ching Fortune Guide</h1>
+        <p id="subtitle">Enter your birth date and time to see a detailed I Ching reading.</p>
+      </div>
+      <div class="lang-switch">
+        <label for="language">Language</label>
+        <select id="language" name="language" aria-label="Language">
+          <option value="en">English</option>
+          <option value="ko">한국어</option>
+          <option value="ja">日本語</option>
+        </select>
+      </div>
+    </header>
+
+    <form id="fortune-form">
+      <div class="grid">
+        <div>
+          <label id="birth-date-label" for="birth-date">Birth date</label>
+          <input id="birth-date" name="birth-date" type="date" required />
+        </div>
+        <div>
+          <label id="birth-time-label" for="birth-time">Birth time</label>
+          <input id="birth-time" name="birth-time" type="time" required />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="generate" type="submit">Get Fortune</button>
+        <span id="helper">Your input is only used on this device.</span>
+      </div>
+    </form>
+
+    <section id="result" class="result" hidden>
+      <div id="meta"></div>
+      <h2 id="result-title">Your Hexagram</h2>
+      <p id="result-summary"></p>
+      <div class="sections" id="sections"></div>
+    </section>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        title: "I Ching Fortune Guide",
+        subtitle: "Enter your birth date and time to see a detailed I Ching reading.",
+        label: "Language",
+        home: "Back to Lotto",
+        date: "Birth date",
+        time: "Birth time",
+        button: "Get Fortune",
+        helper: "Your input is only used on this device.",
+        resultTitle: "Your Hexagram",
+        summaryPrefix: "Core theme:",
+        sections: {
+          overall: "Overall",
+          career: "Career",
+          love: "Love",
+          money: "Money",
+          health: "Health",
+          advice: "Guidance",
+        },
+      },
+      ko: {
+        title: "주역 운세 안내",
+        subtitle: "생년월일과 시간을 입력하면 상세한 주역 운세를 확인할 수 있어요.",
+        label: "언어",
+        home: "로또로 돌아가기",
+        date: "생년월일",
+        time: "태어난 시간",
+        button: "운세 보기",
+        helper: "입력값은 이 기기에서만 사용됩니다.",
+        resultTitle: "나의 괘",
+        summaryPrefix: "핵심 주제:",
+        sections: {
+          overall: "전체운",
+          career: "일·학업",
+          love: "연애",
+          money: "재물운",
+          health: "건강",
+          advice: "조언",
+        },
+      },
+      ja: {
+        title: "易占いガイド",
+        subtitle: "生年月日と時間を入力すると詳しい易の占いが表示されます。",
+        label: "言語",
+        home: "ロトへ戻る",
+        date: "生年月日",
+        time: "出生時間",
+        button: "占いを見る",
+        helper: "入力はこの端末内のみで使用されます。",
+        resultTitle: "あなたの卦",
+        summaryPrefix: "中心テーマ:",
+        sections: {
+          overall: "総合運",
+          career: "仕事・学業",
+          love: "恋愛",
+          money: "金運",
+          health: "健康",
+          advice: "助言",
+        },
+      },
+    };
+
+    const trigrams = [
+      {
+        key: "qian",
+        en: { name: "Heaven", trait: "clarity and leadership" },
+        ko: { name: "건(乾)", trait: "맑은 기운과 리더십" },
+        ja: { name: "乾", trait: "澄んだ気とリーダーシップ" },
+      },
+      {
+        key: "dui",
+        en: { name: "Lake", trait: "joyful openness" },
+        ko: { name: "태(兌)", trait: "밝은 소통과 즐거움" },
+        ja: { name: "兌", trait: "開放的な喜び" },
+      },
+      {
+        key: "li",
+        en: { name: "Fire", trait: "passion and insight" },
+        ko: { name: "리(離)", trait: "열정과 통찰" },
+        ja: { name: "離", trait: "情熱と洞察" },
+      },
+      {
+        key: "zhen",
+        en: { name: "Thunder", trait: "bold momentum" },
+        ko: { name: "진(震)", trait: "도전과 추진력" },
+        ja: { name: "震", trait: "大胆な推進力" },
+      },
+      {
+        key: "xun",
+        en: { name: "Wind", trait: "steady growth" },
+        ko: { name: "손(巽)", trait: "꾸준한 성장" },
+        ja: { name: "巽", trait: "着実な成長" },
+      },
+      {
+        key: "kan",
+        en: { name: "Water", trait: "deep intuition" },
+        ko: { name: "감(坎)", trait: "깊은 직관" },
+        ja: { name: "坎", trait: "深い直感" },
+      },
+      {
+        key: "gen",
+        en: { name: "Mountain", trait: "stillness and focus" },
+        ko: { name: "간(艮)", trait: "멈춤과 집중" },
+        ja: { name: "艮", trait: "静けさと集中" },
+      },
+      {
+        key: "kun",
+        en: { name: "Earth", trait: "supportive harmony" },
+        ko: { name: "곤(坤)", trait: "포용과 조화" },
+        ja: { name: "坤", trait: "支える調和" },
+      },
+    ];
+
+    const lineAdvice = {
+      en: [
+        "The first line favors preparation before action.",
+        "The second line asks for patience and steady effort.",
+        "The third line signals tension; keep your balance.",
+        "The fourth line rewards flexible thinking.",
+        "The fifth line highlights a peak moment; lead with integrity.",
+        "The sixth line suggests completion and graceful release.",
+      ],
+      ko: [
+        "초효는 행동 전 준비가 필요함을 말합니다.",
+        "이효는 인내와 꾸준함을 요구합니다.",
+        "삼효는 긴장이 생기니 균형을 지키세요.",
+        "사효는 유연한 사고가 성과를 부릅니다.",
+        "오효는 정점의 순간이니 바른 리더십이 필요합니다.",
+        "상효는 마무리와 내려놓음을 권합니다.",
+      ],
+      ja: [
+        "初爻は準備を整えることが大切だと示します。",
+        "二爻は忍耐と地道な努力を求めます。",
+        "三爻は緊張が生まれるのでバランスを守りましょう。",
+        "四爻は柔軟な発想が成果を呼びます。",
+        "五爻は頂点の時期、誠実なリーダーシップが鍵です。",
+        "上爻は締めくくりと手放しを示します。",
+      ],
+    };
+
+    const sectionTemplates = {
+      en: {
+        overall: (upper, lower) =>
+          `The interaction of ${upper} over ${lower} sets a tone of ${upper.trait} grounded by ${lower.trait}.`,
+        career: (upper, lower) =>
+          `In work and study, lead with ${upper.trait} while applying ${lower.trait} to daily tasks.`,
+        love: (upper, lower) =>
+          `Relationships deepen when ${upper.trait} meets the warmth of ${lower.trait}.`,
+        money: (upper, lower) =>
+          `Financial flow improves through ${lower.trait}, then expands with ${upper.trait}.`,
+        health: (upper, lower) =>
+          `Balance your energy: channel ${upper.trait} and rest with ${lower.trait}.`,
+        advice: (upper, lower, line) =>
+          `Focus on the changing line: ${line} Let ${upper.trait} guide the direction and ${lower.trait} steady the pace.`,
+      },
+      ko: {
+        overall: (upper, lower) =>
+          `${upper.name}의 기운이 ${lower.name} 위에 놓이며 ${upper.trait}이(가) ${lower.trait}와 조화를 이룹니다.`,
+        career: (upper, lower) =>
+          `일과 학업에서는 ${upper.trait}을(를) 앞세우고, ${lower.trait}로 실행력을 다지세요.`,
+        love: (upper, lower) =>
+          `연애운은 ${upper.trait}이(가) ${lower.trait}와 만나면 안정됩니다.`,
+        money: (upper, lower) =>
+          `재물운은 ${lower.trait}로 기반을 쌓고 ${upper.trait}로 확장됩니다.`,
+        health: (upper, lower) =>
+          `${upper.trait}을(를) 펼치되 ${lower.trait}로 컨디션을 회복하세요.`,
+        advice: (upper, lower, line) =>
+          `변효 조언: ${line} ${upper.trait}이(가) 방향을 잡고 ${lower.trait}이(가) 속도를 조절합니다.`,
+      },
+      ja: {
+        overall: (upper, lower) =>
+          `${upper.name}が${lower.name}の上にあり、${upper.trait}が${lower.trait}と調和します。`,
+        career: (upper, lower) =>
+          `仕事や学業では${upper.trait}を前面にし、${lower.trait}で実行力を整えましょう。`,
+        love: (upper, lower) =>
+          `恋愛は${upper.trait}が${lower.trait}と結びつくと安定します。`,
+        money: (upper, lower) =>
+          `金運は${lower.trait}で基盤を作り、${upper.trait}で広がります。`,
+        health: (upper, lower) =>
+          `${upper.trait}を発揮しつつ、${lower.trait}で体調を整えてください。`,
+        advice: (upper, lower, line) =>
+          `変爻の助言: ${line} ${upper.trait}で方向性を示し、${lower.trait}で歩みを整えましょう。`,
+      },
+    };
+
+    const languageSelect = document.getElementById("language");
+    const title = document.getElementById("title");
+    const subtitle = document.getElementById("subtitle");
+    const homeLink = document.getElementById("home-link");
+    const birthDateLabel = document.getElementById("birth-date-label");
+    const birthTimeLabel = document.getElementById("birth-time-label");
+    const button = document.getElementById("generate");
+    const helper = document.getElementById("helper");
+    const result = document.getElementById("result");
+    const resultTitle = document.getElementById("result-title");
+    const resultSummary = document.getElementById("result-summary");
+    const meta = document.getElementById("meta");
+    const sections = document.getElementById("sections");
+
+    function normalizeLanguage(value) {
+      if (!value) return "en";
+      if (value.startsWith("ko")) return "ko";
+      if (value.startsWith("ja")) return "ja";
+      return "en";
+    }
+
+    function applyLanguage(lang) {
+      const t = translations[lang] ?? translations.en;
+      title.textContent = t.title;
+      subtitle.textContent = t.subtitle;
+      homeLink.textContent = t.home;
+      birthDateLabel.textContent = t.date;
+      birthTimeLabel.textContent = t.time;
+      button.textContent = t.button;
+      helper.textContent = t.helper;
+      document.querySelector(".lang-switch label").textContent = t.label;
+      resultTitle.textContent = t.resultTitle;
+      document.documentElement.lang = lang;
+      document.documentElement.dataset.lang = lang;
+      document.title = t.title;
+    }
+
+    function hashBirth(dateValue, timeValue) {
+      const date = new Date(`${dateValue}T${timeValue}:00`);
+      const seed = Number.isNaN(date.getTime()) ? 0 : date.getTime();
+      return Math.abs(seed);
+    }
+
+    function pickHexagram(seed) {
+      const hexagram = seed % 64;
+      const upper = Math.floor(hexagram / 8);
+      const lower = hexagram % 8;
+      const line = seed % 6;
+      return { hexagram, upper, lower, line };
+    }
+
+    function buildReading(lang, data) {
+      const upper = trigrams[data.upper][lang];
+      const lower = trigrams[data.lower][lang];
+      const template = sectionTemplates[lang] || sectionTemplates.en;
+      const lineText = lineAdvice[lang] ? lineAdvice[lang][data.line] : lineAdvice.en[data.line];
+
+      const resultMeta = [
+        `<span class="pill">#${data.hexagram + 1}</span>`,
+        `<span class="pill">${upper.name}</span>`,
+        `<span class="pill">${lower.name}</span>`,
+      ].join(" ");
+
+      const summary = `${translations[lang].summaryPrefix} ${upper.trait} + ${lower.trait}`;
+
+      const items = [
+        { key: "overall", text: template.overall(upper, lower) },
+        { key: "career", text: template.career(upper, lower) },
+        { key: "love", text: template.love(upper, lower) },
+        { key: "money", text: template.money(upper, lower) },
+        { key: "health", text: template.health(upper, lower) },
+        { key: "advice", text: template.advice(upper, lower, lineText) },
+      ];
+
+      return { resultMeta, summary, items };
+    }
+
+    function renderReading(lang, reading) {
+      meta.innerHTML = reading.resultMeta;
+      resultSummary.textContent = reading.summary;
+      sections.innerHTML = reading.items
+        .map(
+          (item) => `
+            <div class="section">
+              <h3>${translations[lang].sections[item.key]}</h3>
+              <p>${item.text}</p>
+            </div>
+          `
+        )
+        .join("");
+      result.hidden = false;
+    }
+
+    const savedLanguage = localStorage.getItem("lotto-language") || navigator.language;
+    const normalizedLanguage = normalizeLanguage(savedLanguage);
+    languageSelect.value = normalizedLanguage in translations ? normalizedLanguage : "en";
+    applyLanguage(languageSelect.value);
+
+    languageSelect.addEventListener("change", (event) => {
+      const nextLanguage = event.target.value;
+      localStorage.setItem("lotto-language", nextLanguage);
+      applyLanguage(nextLanguage);
+    });
+
+    document.getElementById("fortune-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const dateValue = document.getElementById("birth-date").value;
+      const timeValue = document.getElementById("birth-time").value;
+      if (!dateValue || !timeValue) return;
+
+      const seed = hashBirth(dateValue, timeValue);
+      const data = pickHexagram(seed);
+      const lang = languageSelect.value;
+      const reading = buildReading(lang, data);
+      renderReading(lang, reading);
+    });
+  </script>
+</body>
+</html>
