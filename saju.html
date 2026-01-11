@@ -130,6 +130,7 @@
         button: "Get Fortune",
         helper: "Your input is only used on this device.",
         error: "Something went wrong. Please check your inputs and try again.",
+        errorDetail: "Details",
         missing: "Please fill out the required date and time fields.",
         resultTitle: "Your Hexagram",
         summaryPrefix: "Core theme:",
@@ -186,6 +187,7 @@
         button: "운세 보기",
         helper: "입력값은 이 기기에서만 사용됩니다.",
         error: "입력값을 확인한 뒤 다시 시도해주세요.",
+        errorDetail: "오류 상세",
         missing: "생년월일과 시간을 모두 입력해주세요.",
         resultTitle: "나의 괘",
         summaryPrefix: "핵심 주제:",
@@ -242,6 +244,7 @@
         button: "占いを見る",
         helper: "入力はこの端末内のみで使用されます。",
         error: "入力内容を確認してもう一度お試しください。",
+        errorDetail: "詳細",
         missing: "生年月日と時間を入力してください。",
         resultTitle: "あなたの卦",
         summaryPrefix: "中心テーマ:",
@@ -677,7 +680,12 @@
         const lunarDay = Number(lunarDayInput.value);
         if (!lunarYear || !lunarMonth || !lunarDay) return null;
         const monthValue = leapMonthInput.checked ? -lunarMonth : lunarMonth;
-        const lunar = Lunar.fromYmdHms(lunarYear, monthValue, lunarDay, hour, minute, 0);
+        let lunar = null;
+        try {
+          lunar = Lunar.fromYmdHms(lunarYear, monthValue, lunarDay, hour, minute, 0);
+        } catch (error) {
+          throw new Error(`Invalid lunar date: ${error.message}`);
+        }
         const solar = lunar.getSolar();
         localSolarParts = {
           year: solar.getYear(),
@@ -694,14 +702,19 @@
 
       const utcDate = zonedTimeToUtc(localSolarParts, inputTimeZone);
       const kstParts = formatParts(utcDate, "Asia/Seoul");
-      const kstSolar = Solar.fromYmdHms(
-        kstParts.year,
-        kstParts.month,
-        kstParts.day,
-        kstParts.hour,
-        kstParts.minute,
-        0
-      );
+      let kstSolar = null;
+      try {
+        kstSolar = Solar.fromYmdHms(
+          kstParts.year,
+          kstParts.month,
+          kstParts.day,
+          kstParts.hour,
+          kstParts.minute,
+          0
+        );
+      } catch (error) {
+        throw new Error(`Invalid solar date: ${error.message}`);
+      }
       const lunar = kstSolar.getLunar();
       const eightChar = lunar.getEightChar();
 
@@ -961,7 +974,8 @@
         const reading = buildReading(lang, data);
         renderReading(lang, data, reading);
       } catch (error) {
-        setStatus(translations[lang].error, true);
+        const detail = error && error.message ? ` (${translations[lang].errorDetail}: ${error.message})` : "";
+        setStatus(`${translations[lang].error}${detail}`, true);
         console.error(error);
       }
     });
